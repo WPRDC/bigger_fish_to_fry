@@ -31,6 +31,7 @@ def convert_string_to_dt(s):
 
 def remove_crs(s):
     # Replace carriage returns with slashes.
+    s = re.sub("\r\n","/",s)
     s = re.sub("\n","/",s)
     return s
 
@@ -70,7 +71,7 @@ for feature in locations:
 
     if 'events' in properties:
         events = []
-        for e in properties['events'].values():
+        for e in properties['events']:
             start = convert_string_to_dt(e['dt_start'])
             end = convert_string_to_dt(e['dt_end'])
             output = "{} from {} to {}".format(
