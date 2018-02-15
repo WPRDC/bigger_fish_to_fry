@@ -6,13 +6,21 @@ import requests
 import pprint
 import datetime
 
+from unidecode import unidecode # This module does its best
+# to convert Unicode (like "smart" quotes) to their ASCII
+# equivalents.
+
 reload(sys) # These lines, and the two at the top of the file, are
 sys.setdefaultencoding('utf8') # needed to defeat this error:
 #       UnicodeDecodeError: 'ascii' codec can't decode byte XXXXX
 
+# The above is a Python 2 solution to this problem.
+# There is another solution that I have used elsewhere that
+# is reputed to be better.
+
 def cast_to_utf8(u):
     if u is None:
-        return ''
+        return u''
     return unicode(u).encode('utf-8')
 
 def write_to_csv(filename,list_of_dicts,keys):
@@ -39,8 +47,6 @@ def remove_crs(s):
 url = "http://fishfry.codeforpgh.com/api/fishfries/" # 2018 URL
 
 r = requests.get(url)
-print(dir(r))
-print(r.status_code)
 locations = r.json()['features']
 
 pprint.pprint(locations[0])
@@ -50,14 +56,19 @@ for feature in locations:
     fry = {}
     properties = feature['properties']
     for key in properties:
-        if key not in ['events','uuid']:
+        if key == 'menu':
+            fry['menu_text'] = unidecode(unicode(cast_to_utf8(properties[key]['text'])))
+            fry['menu_url'] = unidecode(unicode(cast_to_utf8(properties[key]['url'])))
+
+        elif key not in ['events','uuid']:
             fry[key] = properties[key]
             if isinstance(fry[key], unicode):
-                fry[key] = cast_to_utf8(fry[key])
-                fry[key] = remove_crs(cast_to_utf8(fry[key]))
-# It's actually OK if the menu has carriage returns in it. It makes
-# the CSV file look like it has more entries than it actually does, but
-# it gets imported into the Datastore properly.
+                fry[key] = remove_crs(unidecode(unicode(cast_to_utf8(fry[key]))))
+        # It's actually OK if the menu has carriage returns in it. It makes
+        # the CSV file look like it has more entries than it actually does, but
+        # it gets imported into the Datastore properly.
+
+                
     if 'cartodb_id' in fry:
         fry['id'] = fry['cartodb_id']
         del fry['cartodb_id']
@@ -87,7 +98,7 @@ for feature in locations:
 pprint.pprint(list_of_fries[0])
 
 
-keys = ['validated', 'venue_name', 'venue_type', 'venue_address', 'website', 'events', 'etc', 'menu', 'venue_notes', 'phone', 'email',  'homemade_pierogies', 'take_out', 'alcohol', 'lunch', 'handicap', 'publish', 'id', 'latitude', 'longitude']
+keys = ['validated', 'venue_name', 'venue_type', 'venue_address', 'website', 'events', 'etc', 'menu_url', 'menu_text', 'venue_notes', 'phone', 'email',  'homemade_pierogies', 'take_out', 'alcohol', 'lunch', 'handicap', 'publish', 'id', 'latitude', 'longitude']
 
 filename = '{}_Pittsburgh_Fish_Fry_Locations.csv'.format(datetime.datetime.now().year)
 write_to_csv(filename,list_of_fries,keys)
