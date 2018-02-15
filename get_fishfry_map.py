@@ -11,6 +11,8 @@ sys.setdefaultencoding('utf8') # needed to defeat this error:
 #       UnicodeDecodeError: 'ascii' codec can't decode byte XXXXX
 
 def cast_to_utf8(u):
+    if u is None:
+        return ''
     return unicode(u).encode('utf-8')
 
 def write_to_csv(filename,list_of_dicts,keys):
