@@ -33,6 +33,8 @@ def write_to_csv(filename,list_of_dicts,keys):
         dict_writer.writerows(list_of_dicts)
 
 def convert_string_to_dt(s):
+    if s is None:
+        return None
     s = re.sub("-\d\d:\d\d$","",s)
     dt = datetime.datetime.strptime(s,"%Y-%m-%dT%H:%M:%S")
     return dt
@@ -85,12 +87,16 @@ for feature in locations:
         for e in properties['events']:
             start = convert_string_to_dt(e['dt_start'])
             end = convert_string_to_dt(e['dt_end'])
-            output = "{} from {} to {}".format(
-                datetime.datetime.strftime(start,"%A %b %-d"),
-                datetime.datetime.strftime(start,"%-I:%M %p"),
-                datetime.datetime.strftime(end,"%-I:%M %p")
-            )
-            events.append(output)
+            if start is not None and end is not None:
+                output = "{} from {} to {}".format(
+                    datetime.datetime.strftime(start,"%A %b %-d"),
+                    datetime.datetime.strftime(start,"%-I:%M %p"),
+                    datetime.datetime.strftime(end,"%-I:%M %p")
+                )
+                events.append(output)
+            if (start is None) != (end is None):
+                print(" **** start = {}, while end = {}".format(start,end))
+
         if events != []:
             fry['events'] = ', '.join(events)
 
