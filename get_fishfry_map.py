@@ -3,7 +3,7 @@ import sys
 import csv, re, os
 import json
 import requests
-import pprint
+from pprint import pprint
 import datetime
 
 from unidecode import unidecode # This module does its best
@@ -49,7 +49,7 @@ url = "http://fishfry.codeforpgh.com/api/fishfries/" # 2018 URL
 r = requests.get(url)
 locations = r.json()['features']
 
-pprint.pprint(locations[0])
+print(locations[0])
 
 list_of_fries = []
 for feature in locations:
@@ -95,7 +95,7 @@ for feature in locations:
             fry['events'] = ', '.join(events)
 
     list_of_fries.append(fry)
-pprint.pprint(list_of_fries[0])
+pprint(list_of_fries[0])
 
 
 keys = ['validated', 'venue_name', 'venue_type', 'venue_address', 'website', 'events', 'etc', 'menu_url', 'menu_text', 'venue_notes', 'phone', 'email',  'homemade_pierogies', 'take_out', 'alcohol', 'lunch', 'handicap', 'publish', 'id', 'latitude', 'longitude']
