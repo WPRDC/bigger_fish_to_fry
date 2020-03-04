@@ -8,20 +8,7 @@ import datetime
 
 from unidecode import unidecode # This module does its best
 # to convert Unicode (like "smart" quotes) to their ASCII
-# equivalents.
-
-#reload(sys) # These lines, and the two at the top of the file, are
-#sys.setdefaultencoding('utf8') # needed to defeat this error:
-#       UnicodeDecodeError: 'ascii' codec can't decode byte XXXXX
-
-# The above is a Python 2 solution to this problem.
-# There is another solution that I have used elsewhere that
-# is reputed to be better.
-
-def cast_to_utf8(u):
-    if u is None:
-        return u''
-    return str(u).encode('utf-8')
+# equivalents. It is also stripping out emoji characters.
 
 def write_to_csv(filename,list_of_dicts,keys):
     # Stolen from parking-data util.py file.
@@ -59,7 +46,7 @@ for feature in locations:
     properties = feature['properties']
     for key in properties:
         if key == 'menu':
-            fry['menu_text'] = properties[key]['text'] #str(unidecode(str(cast_to_utf8(properties[key]['text']))))
+            fry['menu_text'] = properties[key]['text']
             fry['menu_url'] = properties[key]['url']
 
             fs = ['menu_text', 'menu_url']
