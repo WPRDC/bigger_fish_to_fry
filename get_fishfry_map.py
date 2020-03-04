@@ -10,8 +10,8 @@ from unidecode import unidecode # This module does its best
 # to convert Unicode (like "smart" quotes) to their ASCII
 # equivalents.
 
-reload(sys) # These lines, and the two at the top of the file, are
-sys.setdefaultencoding('utf8') # needed to defeat this error:
+#reload(sys) # These lines, and the two at the top of the file, are
+#sys.setdefaultencoding('utf8') # needed to defeat this error:
 #       UnicodeDecodeError: 'ascii' codec can't decode byte XXXXX
 
 # The above is a Python 2 solution to this problem.
@@ -21,13 +21,13 @@ sys.setdefaultencoding('utf8') # needed to defeat this error:
 def cast_to_utf8(u):
     if u is None:
         return u''
-    return unicode(u).encode('utf-8')
+    return str(u).encode('utf-8')
 
 def write_to_csv(filename,list_of_dicts,keys):
     # Stolen from parking-data util.py file.
-    with open(filename, 'wb') as g:
+    with open(filename, 'w') as g:
         g.write(','.join(keys)+'\n')
-    with open(filename, 'ab') as output_file:
+    with open(filename, 'a') as output_file:
         dict_writer = csv.DictWriter(output_file, keys, extrasaction='ignore', lineterminator='\n')
         #dict_writer.writeheader()
         dict_writer.writerows(list_of_dicts)
@@ -59,13 +59,18 @@ for feature in locations:
     properties = feature['properties']
     for key in properties:
         if key == 'menu':
-            fry['menu_text'] = unidecode(unicode(cast_to_utf8(properties[key]['text'])))
-            fry['menu_url'] = unidecode(unicode(cast_to_utf8(properties[key]['url'])))
+            fry['menu_text'] = properties[key]['text'] #str(unidecode(str(cast_to_utf8(properties[key]['text']))))
+            fry['menu_url'] = properties[key]['url']
 
-        elif key not in ['events','uuid']:
+            fs = ['menu_text', 'menu_url']
+            for f in fs:
+                if fry[f] is not None:
+                    fry[f] = unidecode(fry[f])
+
+        elif key not in ['events', 'uuid']:
             fry[key] = properties[key]
-            if isinstance(fry[key], unicode):
-                fry[key] = remove_crs(unidecode(unicode(cast_to_utf8(fry[key]))))
+            if isinstance(fry[key], str):
+                fry[key] = remove_crs(unidecode(fry[key]))
         # It's actually OK if the menu has carriage returns in it. It makes
         # the CSV file look like it has more entries than it actually does, but
         # it gets imported into the Datastore properly.
